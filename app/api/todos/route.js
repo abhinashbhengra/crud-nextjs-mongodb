@@ -1,24 +1,47 @@
-import connectMongoDB from "@/lib/mongodb";
+import connectDb from "@/lib/mongodb";
 import Todo from "@/models/todo";
 import { NextResponse } from "next/server";
 
-export async function POST(request) {
-  const { title, description } = await request.json();
-  await connectMongoDB();
-  await Todo.create({ title, description });
-  return NextResponse.json({ message: "Todo created" }, { status: 201 });
-}
-
 export async function GET() {
-  await connectMongoDB();
-  const todos = await Todo.find();
-  return NextResponse.json({ todos });
+  try {
+    await connectDb(); // Connect to the MongoDB database
+
+    const todos = await Todo.find({});
+
+    // res.json(todos);
+
+    return NextResponse.json({ todos });
+  } catch (e) {
+    console.error(e);
+  }
 }
 
-export async function DELETE(request) {
-  const id = request.searchParams.get("id");
-  console.log(id);
-  await connectMongoDB();
-  await Todo.findByIdAndDelete(id);
-  return NextResponse.json({ message: "Todo deleted" }, { status: 200 });
+export async function POST(req) {
+  try {
+    const { title, description } = await req.json();
+    await connectDb();
+    await Todo.create({ title, description });
+    return NextResponse.json({ message: "Todo created" }, { status: 200 });
+  } catch (error) {
+    console.log(error);
+  }
 }
+
+// export async function DELETE(req) {
+//   try {
+//     const id = request.searchParams.get("id");
+//     await connectDb();
+//     await Todo.findByIdAndDelete(id);
+//     return NextResponse.json({ message: "Todo deleted" });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+
+// export async function DELETE(request) {
+//   const id = request.searchParams.get("id");
+//   console.log(id);
+//   await connectMongoDB();
+//   await Todo.findByIdAndDelete(id);
+//   return NextResponse.json({ message: "Todo deleted" }, { status: 200 });
+// }
